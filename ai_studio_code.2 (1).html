@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NARROYEN — Daily OS for Students, Business & Corporate Teams</title>
+  <style>
+    :root {
+      --bg: #f3f5f9;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --primary-soft: #eef2ff;
+      --hero-bg: #ffffff;
+      --logo-grad: linear-gradient(135deg, #0f172a, #4f46e5);
+      --success: #16a34a;
+      --success-soft: #dcfce7;
+      --warning: #d97706;
+      --warning-soft: #fef3c7;
+      --danger: #dc2626;
+      --radius: 16px;
+      --shadow: 0 8px 26px rgba(15, 23, 42, 0.06);
+    }
+
+    body[data-theme="business"] {
+      --bg: #f7f5f0;
+      --surface-soft: #fcfaf5;
+      --primary: #b45309;
+      --primary-hover: #92400e;
+      --primary-soft: #fef3c7;
+      --hero-bg: linear-gradient(135deg, #111827, #1f2937);
+      --logo-grad: linear-gradient(135deg, #b45309, #f59e0b);
+    }
+    body[data-theme="business"] .hero-bar { color: #fff; border-color: #374151; }
+    body[data-theme="business"] .hero-quote { color: #d1d5db; }
+    body[data-theme="business"] .stat-card { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.16); color: #fff; }
+    body[data-theme="business"] .stat-label { color: #fcd34d; }
+
+    body[data-theme="corporate"] {
+      --bg: #f0f6f6;
+      --surface-soft: #f5fbfb;
+      --primary: #0f766e;
+      --primary-hover: #115e59;
+      --primary-soft: #ccfbf1;
+      --hero-bg: linear-gradient(135deg, #0f172a, #134e4a);
+      --logo-grad: linear-gradient(135deg, #0f766e, #14b8a6);
+    }
+    body[data-theme="corporate"] .hero-bar { color: #fff; border-color: #115e59; }
+    body[data-theme="corporate"] .hero-quote { color: #ccfbf1; }
+    body[data-theme="corporate"] .stat-card { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: #fff; }
+    body[data-theme="corporate"] .stat-label { color: #99f6e4; }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.45; transition: background 0.25s ease;
+    }
+    button, input, select, textarea { font: inherit; }
+
+    .overlay {
+      position: fixed; inset: 0; background: rgba(15,23,42,0.72); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 100;
+    }
+    .overlay.hidden { display: none; }
+    .modal-card {
+      background: var(--surface); max-width: 720px; width: 100%; border-radius: 24px;
+      padding: 28px; box-shadow: 0 25px 60px rgba(0,0,0,0.28); max-height: 92vh; overflow-y: auto;
+    }
+
+    .brand-mark-lg {
+      width: 48px; height: 48px; border-radius: 14px; background: var(--logo-grad);
+      color: #fff; display: grid; place-items: center; font-weight: 900; font-size: 1.45rem; margin-bottom: 12px;
+    }
+
+    .role-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+    .role-card {
+      border: 2px solid var(--border); background: var(--surface-soft); border-radius: 16px;
+      padding: 16px 14px; text-align: left; cursor: pointer; transition: 0.16s;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .role-card:hover { border-color: var(--primary); background: var(--primary-soft); transform: translateY(-2px); }
+    .batch-setup { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); display: none; }
+    .batch-setup.visible { display: block; }
+
+    /* Header */
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 40; }
+    .topbar-inner {
+      max-width: 1280px; margin: 0 auto; padding: 12px 20px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .logo-n {
+      width: 40px; height: 40px; border-radius: 12px; background: var(--logo-grad);
+      color: #fff; display: grid; place-items: center; font-weight: 900; font-size: 1.25rem;
+    }
+    .brand-name { font-weight: 900; font-size: 1.15rem; letter-spacing: 0.08em; text-transform: uppercase; }
+    .header-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .pill-btn {
+      border: 1px solid var(--border); background: var(--surface-soft); padding: 7px 13px;
+      border-radius: 999px; font-size: 0.82rem; font-weight: 700; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px; color: var(--text);
+    }
+    .pill-btn:hover { border-color: var(--primary); }
+    .pill-btn.active-rem { background: var(--success-soft); border-color: #bbf7d0; color: #15803d; }
+
+    .container { max-width: 1280px; margin: 18px auto 40px; padding: 0 20px; }
+
+    .hero-bar {
+      background: var(--hero-bg); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 18px 22px; box-shadow: var(--shadow);
+      display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap; margin-bottom: 18px;
+    }
+    .hero-date { font-size: 1.25rem; font-weight: 800; }
+    .hero-quote { font-size: 0.9rem; color: var(--muted); margin-top: 3px; }
+    .hero-stats { display: flex; gap: 12px; flex-wrap: wrap; }
+    .stat-card {
+      background: var(--surface-soft); border: 1px solid var(--border);
+      border-radius: 12px; padding: 10px 16px; min-width: 108px; text-align: center;
+    }
+    .stat-label { font-size: 0.72rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
+    .stat-value { font-size: 1.2rem; font-weight: 900; margin-top: 2px; }
+
+    .workspace { display: grid; grid-template-columns: 365px 1fr; gap: 18px; align-items: start; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+
+    /* Calendar */
+    .cal-head { padding: 16px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .cal-title { font-weight: 800; font-size: 1.05rem; }
+    .cal-controls { display: flex; align-items: center; gap: 6px; }
+    .icon-btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface-soft); cursor: pointer; font-weight: 700; }
+    .today-btn { border: 1px solid var(--border); background: var(--surface-soft); border-radius: 8px; padding: 5px 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+    .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); padding: 10px 12px 4px; text-align: center; font-size: 0.73rem; font-weight: 800; color: var(--muted); }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; padding: 6px 12px 12px; }
+    .day-cell {
+      aspect-ratio: 1 / 1; border-radius: 11px; border: 1px solid transparent; background: var(--surface-soft);
+      cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2px;
+    }
+    .day-cell.outside { background: transparent; color: #94a3b8; }
+    .day-cell:hover { border-color: var(--primary); background: var(--primary-soft); }
+    .day-cell.today { border-color: var(--primary); font-weight: 800; }
+    .day-cell.selected { background: var(--primary); color: #fff; font-weight: 800; }
+    .day-num { font-size: 0.88rem; }
+    .day-fraction {
+      font-size: 0.65rem; font-weight: 800; margin-top: 2px; padding: 1px 5px;
+      border-radius: 999px; background: rgba(79,70,229,0.12); color: var(--primary);
+    }
+    .day-cell.selected .day-fraction { background: rgba(255,255,255,0.24); color: #fff; }
+    .cal-footer-note { padding: 12px 16px; border-top: 1px solid var(--border); background: var(--surface-soft); font-size: 0.8rem; color: var(--muted); }
+
+    /* Planner */
+    .planner-card { display: flex; flex-direction: column; min-height: 670px; }
+    .mode-tabs-bar {
+      padding: 12px 18px 0; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+    }
+    .mode-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+    .mode-tab {
+      border: none; background: transparent; padding: 10px 13px; font-weight: 800;
+      font-size: 0.86rem; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent;
+    }
+    .mode-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .batch-pill {
+      font-size: 0.78rem; font-weight: 700; color: var(--primary); background: var(--primary-soft);
+      border: 1px solid var(--border); border-radius: 999px; padding: 5px 12px; cursor: pointer; margin-bottom: 8px;
+    }
+
+    .sub-header {
+      padding: 13px 18px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+    }
+    .sub-date { font-weight: 800; font-size: 1rem; }
+    .sub-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+    .sub-badge { font-size: 0.76rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--surface-soft); border: 1px solid var(--border); }
+
+    .backlog-banner {
+      background: var(--warning-soft); border-bottom: 1px solid #fde68a;
+      color: #92400e; padding: 8px 18px; font-size: 0.82rem; font-weight: 700; display: none;
+    }
+    .backlog-banner.visible { display: block; }
+
+    .lines-wrap { flex: 1; overflow-y: auto; max-height: 440px; }
+
+    .item-row {
+      display: grid; grid-template-columns: 34px 1fr auto; gap: 10px;
+      padding: 12px 18px; border-bottom: 1px solid #edf2f7; align-items: center;
+    }
+    .item-row.focused-row { background: var(--primary-soft); box-shadow: inset 3px 0 0 var(--primary); }
+    .item-row.completed-row { background: #f6fef9; }
+
+    .line-num { font-weight: 800; font-size: 0.88rem; color: var(--muted); text-align: center; }
+    .item-main { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+    .item-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .cat-select {
+      border: 1px solid var(--border); background: var(--primary-soft); color: var(--primary);
+      font-weight: 700; font-size: 0.78rem; border-radius: 8px; padding: 4px 8px; max-width: 155px;
+    }
+    .line-input {
+      flex: 1; min-width: 140px; border: none; background: transparent; outline: none;
+      font-size: 0.95rem; font-weight: 600; color: var(--text); padding: 3px 0;
+    }
+    .completed-row .line-input { text-decoration: line-through; color: var(--muted); }
+    .inline-time {
+      border: 1px solid var(--border); background: var(--surface-soft);
+      border-radius: 8px; padding: 4px 8px; font-size: 0.78rem; font-weight: 700;
+    }
+
+    .tag-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tag-backlog { font-size: 0.7rem; font-weight: 700; background: var(--warning-soft); color: #b45309; padding: 2px 7px; border-radius: 6px; }
+    .tag-verified { font-size: 0.7rem; font-weight: 700; background: var(--success-soft); color: #15803d; padding: 2px 7px; border-radius: 6px; }
+    .tag-self { font-size: 0.7rem; font-weight: 700; background: var(--warning-soft); color: #92400e; padding: 2px 7px; border-radius: 6px; }
+    .tag-assigned { font-size: 0.7rem; font-weight: 700; background: var(--primary-soft); color: var(--primary); padding: 2px 7px; border-radius: 6px; }
+
+    .checks-wrap { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; max-width: 390px; justify-content: flex-end; }
+    .check-chip {
+      border: 1px solid var(--border); background: var(--surface); padding: 4px 8px;
+      border-radius: 8px; font-size: 0.74rem; font-weight: 700; cursor: pointer; color: var(--muted);
+    }
+    .check-chip.verified, .check-chip.checked { background: var(--success); border-color: var(--success); color: #fff; }
+    .check-chip.self { background: var(--warning); border-color: var(--warning); color: #fff; }
+    .check-chip.no-sec.checked { background: #0f172a; border-color: #0f172a; color: #fff; }
+    .check-chip:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .mark-btn {
+      width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--surface); cursor: pointer; font-weight: 800; display: grid; place-items: center;
+    }
+    .mark-tick { color: var(--success); }
+    .mark-tick.active { background: var(--success); border-color: var(--success); color: #fff; }
+    .mark-cross { color: var(--danger); }
+    .mark-cross:hover { background: var(--danger); border-color: var(--danger); color: #fff; }
+
+    /* Sub-panels */
+    .panel-pad { padding: 18px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; max-height: 550px; }
+    .box { border: 1px solid var(--border); background: var(--surface-soft); border-radius: 14px; padding: 15px; }
+    .box h3 { margin: 0 0 8px; font-size: 0.98rem; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+    .field-input { width: 100%; border: 1px solid var(--border); background: var(--surface); border-radius: 10px; padding: 8px 11px; font-size: 0.88rem; outline: none; }
+    .field-input:focus { border-color: var(--primary); }
+
+    .canvas-toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+    .color-dot { width: 24px; height: 24px; border-radius: 999px; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--border); cursor: pointer; }
+    .color-dot.active { box-shadow: 0 0 0 2px var(--primary); transform: scale(1.1); }
+    .note-canvas {
+      width: 100%; height: 240px; background: #fff; border: 1px solid var(--border);
+      border-radius: 12px; cursor: crosshair; touch-action: none;
+      background-image: linear-gradient(to bottom, transparent 27px, #f1f5f9 28px);
+      background-size: 100% 28px;
+    }
+    .saved-notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-top: 10px; }
+    .note-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+    .note-card img { width: 100%; height: 110px; object-fit: contain; background: #fff; border-radius: 8px; border: 1px solid #edf2f7; }
+
+    .record-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; background: var(--surface); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+    .record-table th, .record-table td { padding: 9px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+    .record-table th { background: var(--surface-soft); font-size: 0.72rem; text-transform: uppercase; color: var(--muted); }
+
+    .conn-item, .meet-item {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 8px;
+    }
+
+    .subject-footer { border-top: 1px solid var(--border); padding: 12px 18px; background: var(--surface-soft); display: flex; flex-direction: column; gap: 10px; }
+    .subject-chips { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .subj-chip { border: 1px solid var(--border); background: var(--surface); padding: 5px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
+    .subj-chip.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .attend-btn { border: none; background: #0f172a; color: #fff; padding: 10px 16px; border-radius: 12px; font-weight: 800; font-size: 0.9rem; cursor: pointer; }
+
+    .bottom-reminder {
+      border-top: 2px solid var(--border); padding: 12px 18px; background: var(--surface);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+    }
+    .primary-btn { border: none; background: var(--primary); color: #fff; padding: 8px 14px; border-radius: 10px; font-weight: 700; font-size: 0.84rem; cursor: pointer; }
+    .primary-btn:hover { background: var(--primary-hover); }
+
+    .class-overlay {
+      position: fixed; inset: 0; background: #0b1120; color: #fff; display: none;
+      flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; z-index: 150;
+    }
+    .class-overlay.visible { display: flex; }
+    .class-timer { font-size: 3.4rem; font-weight: 900; margin: 14px 0; font-variant-numeric: tabular-nums; }
+
+    .reminder-popup {
+      position: fixed; right: 20px; bottom: 20px; background: #0f172a; color: #fff;
+      padding: 16px 18px; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+      max-width: 350px; width: calc(100% - 40px); z-index: 200; display: none; flex-direction: column; gap: 10px;
+    }
+    .reminder-popup.visible { display: flex; }
+
+    @media (max-width: 960px) {
+      .workspace, .role-grid, .form-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body data-theme="student">
+
+  <!-- Onboarding -->
+  <div id="onboardingOverlay" class="overlay hidden">
+    <div class="modal-card">
+      <div class="brand-mark-lg">N</div>
+      <h1 style="margin:0 0 6px;">NARROYEN</h1>
+      <p style="margin:0; color:var(--muted);">Where are you right now? Select your role to launch your tailored workspace.</p>
+
+      <div class="role-grid">
+        <button class="role-card" data-role="student">
+          <span style="font-size:1.5rem;">🎓</span>
+          <strong>Student</strong>
+          <span style="font-size:0.78rem; color:var(--muted);">PW / JEE / NEET Coaching · Lectures, DPP, PYQs, Practice Sheets, Tests & Handwritten Notes</span>
+        </button>
+        <button class="role-card" data-role="business">
+          <span style="font-size:1.5rem;">🚀</span>
+          <strong>Business Professional</strong>
+          <span style="font-size:0.78rem; color:var(--muted);">Employers · Connect Employees, Assign Tasks & Schedule Meetings</span>
+        </button>
+        <button class="role-card" data-role="corporate">
+          <span style="font-size:1.5rem;">💼</span>
+          <strong>Corporate Job Person</strong>
+          <span style="font-size:0.78rem; color:var(--muted);">Employees · Connect Employers, Join Meetings & Deliverables</span>
+        </button>
+      </div>
+
+      <div id="batchSetupBox" class="batch-setup">
+        <label style="font-weight:700; font-size:0.85rem; display:block; margin-bottom:6px;">
+          Coaching & Batch Name (Class 11th / 12th / JEE / NEET):
+        </label>
+        <div style="display:flex; gap:8px;">
+          <input id="batchNameInput" class="field-input" value="Physics Wallah (PW) · Arjuna 4.0 (JEE / NEET)" />
+          <button id="saveStudentBtn" class="primary-btn">Enter Student OS →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Verification Check Modal -->
+  <div id="verifyModal" class="overlay hidden">
+    <div class="modal-card" style="max-width:520px;">
+      <div class="brand-mark-lg">N</div>
+      <h2 id="verifyModalTitle" style="margin:0 0 6px;">Direct Completion Check</h2>
+      <p style="margin:0 0 14px; color:var(--muted); font-size:0.86rem;">
+        NARROYEN checks whether you directly did this item before marking it <strong>Verified Direct ✓</strong>.
+      </p>
+      <div class="box" style="margin-bottom:12px;">
+        <div style="font-size:0.78rem; font-weight:700; color:var(--muted);">VERIFICATION CHECKPOINT</div>
+        <div id="verifyQuestionText" style="font-weight:700; margin:6px 0;"></div>
+        <input id="verifyAnswerInput" class="field-input" placeholder="Enter key formula, concept, or class keyword..." />
+      </div>
+      <div id="verifyScoreFields" style="display:none; margin-bottom:12px;">
+        <div class="form-grid" style="margin-top:0;">
+          <div>
+            <label style="font-size:0.78rem; font-weight:700;">Score / Solved (e.g. 18/20)</label>
+            <input id="verifyScoreInput" class="field-input" placeholder="18/20" />
+          </div>
+          <div>
+            <label style="font-size:0.78rem; font-weight:700;">Mistake / Summary Note</label>
+            <input id="verifyProofNote" class="field-input" placeholder="e.g. Revise sign convention" />
+          </div>
+        </div>
+      </div>
+      <div id="verifyErrorMsg" style="font-size:0.82rem; color:var(--danger); font-weight:700; margin-bottom:10px;"></div>
+      <div style="display:flex; gap:8px; justify-content:space-between; flex-wrap:wrap;">
+        <button id="verifySelfMarkBtn" class="today-btn">Self-Mark Only (Unverified)</button>
+        <div style="display:flex; gap:8px;">
+          <button id="verifyCancelBtn" class="today-btn">Cancel</button>
+          <button id="verifySubmitBtn" class="primary-btn">Verify & Record ✓</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backend API Key Modal -->
+  <div id="apiModal" class="overlay hidden">
+    <div class="modal-card" style="max-width:560px;">
+      <div class="brand-mark-lg">N</div>
+      <h2 style="margin:0 0 6px;">NARROYEN Backend & Canonical API Key</h2>
+      <p style="margin:0 0 14px; color:var(--muted); font-size:0.88rem;">
+        Connect your deployed <code>narroyen-api</code> Edge Function and <code>x-api-key</code> to sync across devices.
+      </p>
+      <label style="font-weight:700; font-size:0.82rem;">Your Name</label>
+      <input id="apiDisplayNameInput" class="field-input" style="margin:4px 0 10px;" />
+      <label style="font-weight:700; font-size:0.82rem;">Backend Endpoint URL</label>
+      <input id="apiUrlInput" class="field-input" style="margin:4px 0 10px;" placeholder="https://YOUR-PROJECT.supabase.co/functions/v1/narroyen-api" />
+      <label style="font-weight:700; font-size:0.82rem;">Canonical API Key (<code>x-api-key</code>)</label>
+      <input id="apiKeyInput" class="field-input" style="margin:4px 0 12px;" placeholder="nry_live_..." />
+      <div id="apiStatusMsg" style="font-size:0.82rem; color:var(--muted); margin-bottom:12px;"></div>
+      <div style="display:flex; gap:8px; justify-content:flex-end;">
+        <button id="closeApiModalBtn" class="today-btn">Close</button>
+        <button id="saveApiConfigBtn" class="primary-btn">Save & Sync</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo-n">N</div>
+        <div class="brand-name">NARROYEN</div>
+      </div>
+      <div class="header-right">
+        <button id="connectCodeBadge" class="pill-btn">🔗 Code: <span id="myConnectCode">NRY-DEMO01</span></button>
+        <button id="syncCoachingBtn" class="pill-btn">🔄 Sync Coaching Batch</button>
+        <button id="apiModalBtn" class="pill-btn">🔑 <span id="syncStatusLabel">Local Mode</span></button>
+        <button id="reminderToggleBtn" class="pill-btn">🔔 <span id="reminderStatus">Enable reminders</span></button>
+        <button id="rolePillBtn" class="pill-btn">👤 <span id="roleLabel">Student</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero-bar">
+      <div>
+        <div id="heroTodayDate" class="hero-date"></div>
+        <div id="heroQuote" class="hero-quote"></div>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-card">
+          <div id="heroStat1Label" class="stat-label">Batch Items</div>
+          <div id="heroStat1Val" class="stat-value">0/0</div>
+        </div>
+        <div class="stat-card">
+          <div id="heroStat2Label" class="stat-label">Daily Targets</div>
+          <div id="heroStat2Val" class="stat-value">0/0</div>
+        </div>
+        <div class="stat-card">
+          <div id="heroStat3Label" class="stat-label">Day Streak</div>
+          <div id="heroStat3Val" class="stat-value">0</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="workspace">
+      <aside class="card">
+        <div class="cal-head">
+          <div id="calMonthLabel" class="cal-title"></div>
+          <div class="cal-controls">
+            <button id="prevMonthBtn" class="icon-btn">‹</button>
+            <button id="todayBtn" class="today-btn">Today</button>
+            <button id="nextMonthBtn" class="icon-btn">›</button>
+          </div>
+        </div>
+        <div class="weekdays">
+          <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+        </div>
+        <div id="calGrid" class="cal-grid"></div>
+        <div id="calFooterNote" class="cal-footer-note"></div>
+      </aside>
+
+      <section class="card planner-card">
+        <div class="mode-tabs-bar">
+          <div id="tabsContainer" class="mode-tabs"></div>
+          <button id="workspacePillBtn" class="batch-pill"></button>
+        </div>
+
+        <div class="sub-header">
+          <div id="selectedDateHeading" class="sub-date"></div>
+          <div id="subHeaderBadges" class="sub-badges"></div>
+        </div>
+
+        <div id="backlogBanner" class="backlog-banner"></div>
+        <div id="linesContainer" class="lines-wrap"></div>
+        <div id="customPanel" class="panel-pad" style="display:none;"></div>
+
+        <div id="primaryFooter" class="subject-footer">
+          <div id="categoryChipsWrap" class="subject-chips"></div>
+          <button id="attendClassBtn" class="attend-btn"></button>
+          <div id="ruleNoteEl" style="font-size:0.78rem; color:var(--muted);"></div>
+        </div>
+
+        <div id="bottomReminderBar" class="bottom-reminder">
+          <div>
+            <div style="font-size:0.7rem; font-weight:800; color:var(--muted); text-transform:uppercase;">Time & Reminder Below:</div>
+            <div id="focusedLabel" style="font-size:0.86rem; font-weight:700;">Click any line above</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <input id="bottomTimeInput" type="time" class="inline-time" style="width:118px; padding:6px 8px;" />
+            <button id="setReminderBtn" class="primary-btn">⏰ Set Reminder</button>
+            <button id="testAlarmBtn" class="today-btn">🔊 Test Alarm</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div id="classOverlay" class="class-overlay">
+    <div class="brand-mark-lg" style="width:60px; height:60px; font-size:1.7rem;">N</div>
+    <div style="letter-spacing:0.12em; font-weight:800; font-size:0.9rem; color:#94a3b8;">NARROYEN FOCUS LOCK-IN</div>
+    <h2 id="classFocusTitle" style="margin:10px 0 4px;"></h2>
+    <div id="classTimerDisplay" class="class-timer">00:00:00</div>
+    <div style="display:flex; gap:10px;">
+      <button id="classDoneExitBtn" class="primary-btn" style="background:var(--success); padding:11px 18px;">✓ Finish & Log Focus</button>
+      <button id="classExitBtn" class="today-btn" style="background:#1e293b; color:#fff; border-color:#334155; padding:11px 18px;">Exit</button>
+    </div>
+  </div>
+
+  <div id="reminderPopup" class="reminder-popup">
+    <div style="font-weight:800;">⏰ NARROYEN Reminder</div>
+    <div id="reminderPopupMsg" style="font-size:0.9rem; color:#e2e8f0;"></div>
+    <div style="display:flex; gap:8px;">
+      <button id="popupSnoozeBtn" class="today-btn" style="background:#1e293b; color:#fff; border-color:#334155;">Snooze +10m</button>
+      <button id="popupCloseBtn" class="today-btn" style="background:transparent; color:#94a3b8; border-color:#334155;">Dismiss</button>
+    </div>
+  </div>
+
+  <script>
+    const ROLE_CONFIG = {
+      student: {
+        label: "Student",
+        defaultWorkspace: "Physics Wallah (PW) · Arjuna 4.0 (JEE / NEET)",
+        quote: "One chapter at a time. Connect Lectures, DPP, PYQs, Practice Sheets, Tests & Handwritten Notes.",
+        stat1Label: "Batch Items",
+        stat2Label: "Daily Targets",
+        stat3Label: "Day Streak",
+        tabs: [
+          { id: "lectures", label: "Lectures & Coaching" },
+          { id: "targets", label: "🎯 Daily, Weekly & Monthly Targets" },
+          { id: "notes", label: "✍️ Handwritten Notes" },
+          { id: "record", label: "🔗 Batch Sync & Record" }
+        ],
+        categories: ["Physics", "Chemistry", "Maths", "Biology"],
+        placeholder: "Next coaching lecture / chapter…",
+        calFooter: "Tap any date. Unfinished Lectures, DPP, PYQs, Practice Sheets, Tests & Daily Targets move to tomorrow automatically.",
+        focusBtn: "🔇 Shut down. I am going to attend the class.",
+        ruleNote: "Connected materials: Lecture · DPP · PYQs · Practice Sheet · Test · Notes Summary. Click any chip to verify."
+      },
+      business: {
+        label: "Business Professional",
+        defaultWorkspace: "Founder OS · Revenue & Team",
+        quote: "Connect employees, assign targets, and run crisp meetings.",
+        stat1Label: "Deals & Ops",
+        stat2Label: "Daily Targets",
+        stat3Label: "Meetings",
+        tabs: [
+          { id: "lectures", label: "Deals & Operations" },
+          { id: "targets", label: "🎯 Daily, Weekly & Monthly Targets" },
+          { id: "record", label: "👥 Team & Meetings" }
+        ],
+        categories: ["Sales & Leads", "Operations", "Finance", "Marketing"],
+        placeholder: "Next deal or ops priority…",
+        calFooter: "Tap any date. Unfinished deals, employee targets & meetings carry forward automatically.",
+        focusBtn: "🔒 Deep Work Mode — Lock distractions",
+        ruleNote: "Connect employees and schedule meetings inside 'Team & Meetings'."
+      },
+      corporate: {
+        label: "Corporate Job Person",
+        defaultWorkspace: "Corporate Pro · Sprint & Team",
+        quote: "Stay synced with your employer, deliverables, and meetings.",
+        stat1Label: "Deliverables",
+        stat2Label: "Daily Targets",
+        stat3Label: "Meetings",
+        tabs: [
+          { id: "lectures", label: "Sprint Deliverables" },
+          { id: "targets", label: "🎯 Daily, Weekly & Monthly Targets" },
+          { id: "record", label: "👥 Employer & Meetings" }
+        ],
+        categories: ["Deep Work", "Meetings", "Email & Slack", "Upskilling"],
+        placeholder: "Next deliverable…",
+        calFooter: "Tap any date. Unfinished deliverables and employer tasks move to tomorrow automatically.",
+        focusBtn: "🎧 Focus Sprint — Mute Slack & Meetings",
+        ruleNote: "Accept employer connections and RSVP to meetings inside 'Employer & Meetings'."
+      }
+    };
+
+    const MATERIALS = [
+      { key: "lecture", label: "Lecture" },
+      { key: "dpp", label: "DPP" },
+      { key: "pyq", label: "PYQs" },
+      { key: "sheet", label: "Practice Sheet" },
+      { key: "test", label: "Test" },
+      { key: "notes", label: "Notes Summary" }
+    ];
+
+    const STORAGE_KEY = "narroyen_master_v7";
+    const esc = s => String(s || "").replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[m]));
+    const toDateStr = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const parseDateStr = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+    const formatShort = s => parseDateStr(s).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+    const formatHero = s => parseDateStr(s).toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+    const formatDay = s => parseDateStr(s).toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" });
+    const todayStr = toDateStr(new Date());
+
+    let state = loadState();
+    let pendingVerify = null;
+    let activePopupTarget = null;
+
+    function loadState() {
+      const def = {
+        role: null,
+        displayName: "Arjun Mehta",
+        connectCode: "NRY-DEMO01",
+        workspaces: {
+          student: ROLE_CONFIG.student.defaultWorkspace,
+          business: ROLE_CONFIG.business.defaultWorkspace,
+          corporate: ROLE_CONFIG.corporate.defaultWorkspace
+        },
+        activeTab: "lectures",
+        activeCategory: "Physics",
+        selectedDate: todayStr,
+        viewYear: new Date().getFullYear(),
+        viewMonth: new Date().getMonth(),
+        focusedItemId: null,
+        apiUrl: "",
+        apiKey: "",
+        connectedCoaching: { institute: "Physics Wallah (PW)", batchCode: "PW-ARJUNA-40" },
+        lectures: [
+          {
+            id: "pw_1",
+            roleScope: "student",
+            category: "Physics",
+            title: "Rotational Motion L-04 (Torque & Angular Momentum)",
+            scheduledDate: todayStr,
+            reminderTime: "08:52",
+            remindedOn: null,
+            statuses: { lecture: "not_done", dpp: "not_done", pyq: "not_done", sheet: "not_done", test: "not_done", notes: "not_done" },
+            score: "",
+            proofNote: "",
+            focusSeconds: 0,
+            checkQuestion: "Enter key concept/formula from this class (hint: 'torque'):",
+            expectedKeyword: "torque",
+            completedDate: null,
+            dismissed: false
+          }
+        ],
+        targets: [
+          { id: "dt_1", roleScope: "student", cadence: "daily", title: "Finish 25 Rotational PYQs before dinner", date: todayStr, time: "20:00", remindedOn: null, done: false, completedDate: null, dismissed: false },
+          { id: "wt_1", roleScope: "student", cadence: "weekly", title: "Complete Full Rotational Motion + Sunday Test", date: todayStr, time: "18:00", remindedOn: null, done: false, completedDate: null, dismissed: false },
+          { id: "mt_1", roleScope: "student", cadence: "monthly", title: "Finish Mechanics + Organic Chemistry Revision", date: todayStr, time: "21:00", remindedOn: null, done: false, completedDate: null, dismissed: false }
+        ],
+        handwrittenNotes: [],
+        connections: [
+          { id: "c1", partnerId: "emp_priya", partnerName: "Priya Sharma", titleOrDept: "Operations Lead", partnerCode: "NRY-EMP101", status: "active", incoming: false }
+        ],
+        meetings: []
+      };
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? { ...def, ...JSON.parse(raw) } : def;
+      } catch { return def; }
+    }
+    const saveState = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    const uid = () => "id_" + Math.random().toString(36).slice(2, 9) + Date.now().toString(36);
+    const currentRole = () => state.role || "student";
+    const currentCfg = () => ROLE_CONFIG[currentRole()];
+
+    function isLectureDone(lec) {
+      return lec.statuses.lecture !== "not_done" && lec.statuses.dpp !== "not_done";
+    }
+    function isLectureAllVerified(lec) {
+      return lec.statuses.lecture === "verified_direct" && lec.statuses.dpp === "verified_direct";
+    }
+
+    function getLecturesForDate(dStr) {
+      const r = currentRole();
+      return state.lectures.filter(l => {
+        if (l.dismissed || l.roleScope !== r) return false;
+        if (l.scheduledDate === dStr) return true;
+        if (l.scheduledDate < dStr) return !isLectureDone(l) || l.completedDate === dStr;
+        return false;
+      });
+    }
+
+    function getDailyTargetsForDate(dStr) {
+      const r = currentRole();
+      return state.targets.filter(t => {
+        if (t.dismissed || t.roleScope !== r || t.cadence !== "daily") return false;
+        if (t.date === dStr) return true;
+        if (t.date < dStr) return !t.done || t.completedDate === dStr;
+        return false;
+      });
+    }
+
+    function calculateStreak() {
+      const doneDates = new Set();
+      state.lectures.forEach(l => { if (isLectureDone(l) && l.completedDate) doneDates.add(l.completedDate); });
+      state.targets.forEach(t => { if (t.done && t.completedDate) doneDates.add(t.completedDate); });
+      let streak = 0;
+      let cursor = parseDateStr(todayStr);
+      if (!doneDates.has(todayStr)) cursor.setDate(cursor.getDate() - 1);
+      while (doneDates.has(toDateStr(cursor))) {
+        streak++;
+        cursor.setDate(cursor.getDate() - 1);
+      }
+      return streak;
+    }
+
+    async function apiCall(method, path, body) {
+      if (!state.apiUrl || !state.apiKey) return null;
+      try {
+        const res = await fetch(state.apiUrl.replace(/\/$/, "") + path, {
+          method,
+          headers: { "Content-Type": "application/json", "x-api-key": state.apiKey },
+          body: body ? JSON.stringify(body) : undefined
+        });
+        return res.ok ? await res.json() : null;
+      } catch { return null; }
+    }
+
+    // Onboarding
+    const onboardingOverlay = document.getElementById("onboardingOverlay");
+    const batchSetupBox = document.getElementById("batchSetupBox");
+    if (!state.role) onboardingOverlay.classList.remove("hidden");
+
+    document.querySelectorAll(".role-card").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const r = btn.dataset.role;
+        if (r === "student") {
+          batchSetupBox.classList.add("visible");
+        } else {
+          batchSetupBox.classList.remove("visible");
+          state.role = r;
+          state.activeTab = "lectures";
+          state.activeCategory = ROLE_CONFIG[r].categories[0];
+          saveState();
+          onboardingOverlay.classList.add("hidden");
+          apiCall("PUT", "/profile", { role: r, workspace_name: state.workspaces[r] });
+          renderAll();
+        }
+      });
+    });
+
+    document.getElementById("saveStudentBtn").addEventListener("click", () => {
+      state.role = "student";
+      state.workspaces.student = document.getElementById("batchNameInput").value.trim() || ROLE_CONFIG.student.defaultWorkspace;
+      state.activeTab = "lectures";
+      state.activeCategory = "Physics";
+      saveState();
+      onboardingOverlay.classList.add("hidden");
+      apiCall("PUT", "/profile", { role: "student", workspace_name: state.workspaces.student });
+      renderAll();
+    });
+
+    document.getElementById("rolePillBtn").addEventListener("click", () => {
+      batchSetupBox.classList.remove("visible");
+      onboardingOverlay.classList.remove("hidden");
+    });
+
+    document.getElementById("connectCodeBadge").addEventListener("click", () => {
+      navigator.clipboard?.writeText(state.connectCode);
+      alert(`Your Connect Code: ${state.connectCode}\nShare this with your Employer or Corporate Employee to connect.`);
+    });
+
+    document.getElementById("workspacePillBtn").addEventListener("click", () => {
+      const r = currentRole();
+      const val = prompt("Edit batch / workspace name:", state.workspaces[r]);
+      if (val && val.trim()) { state.workspaces[r] = val.trim(); saveState(); renderAll(); }
+    });
+
+    // API Modal
+    document.getElementById("apiModalBtn").addEventListener("click", () => {
+      document.getElementById("apiDisplayNameInput").value = state.displayName;
+      document.getElementById("apiUrlInput").value = state.apiUrl;
+      document.getElementById("apiKeyInput").value = state.apiKey;
+      document.getElementById("apiModal").classList.remove("hidden");
+    });
+    document.getElementById("closeApiModalBtn").addEventListener("click", () => document.getElementById("apiModal").classList.add("hidden"));
+    document.getElementById("saveApiConfigBtn").addEventListener("click", async () => {
+      state.displayName = document.getElementById("apiDisplayNameInput").value.trim() || "NARROYEN User";
+      state.apiUrl = document.getElementById("apiUrlInput").value.trim();
+      state.apiKey = document.getElementById("apiKeyInput").value.trim();
+      saveState();
+      const msg = document.getElementById("apiStatusMsg");
+      if (!state.apiUrl || !state.apiKey) {
+        msg.textContent = "Local Browser Storage active.";
+        renderAll();
+        return;
+      }
+      msg.textContent = "Verifying x-api-key...";
+      const ws = await apiCall("GET", `/workspace?date=${state.selectedDate}`);
+      msg.textContent = ws && ws.profile ? `Connected ✓ (${ws.profile.connect_code})` : "Could not reach backend or invalid x-api-key.";
+      if (ws && ws.profile) state.connectCode = ws.profile.connect_code;
+      saveState();
+      renderAll();
+    });
+
+    // Coaching Batch Sync Button
+    document.getElementById("syncCoachingBtn").addEventListener("click", () => {
+      if (currentRole() !== "student") return;
+      const sampleFeed = [
+        { cat: "Chemistry", title: "Chemical Bonding L-07 (VSEPR & Hybridisation)", time: "11:00", kw: "vsepr" },
+        { cat: "Maths", title: "Quadratic Equations L-05 + JEE Practice Sheet", time: "16:30", kw: "roots" }
+      ];
+      let added = 0;
+      sampleFeed.forEach(s => {
+        if (!state.lectures.some(l => l.title === s.title && l.scheduledDate === state.selectedDate)) {
+          state.lectures.push({
+            id: uid(), roleScope: "student", category: s.cat, title: s.title,
+            scheduledDate: state.selectedDate, reminderTime: s.time, remindedOn: null,
+            statuses: { lecture: "not_done", dpp: "not_done", pyq: "not_done", sheet: "not_done", test: "not_done", notes: "not_done" },
+            score: "", proofNote: "", focusSeconds: 0,
+            checkQuestion: `Enter class keyword/concept (hint: '${s.kw}'):`, expectedKeyword: s.kw,
+            completedDate: null, dismissed: false
+          });
+          added++;
+        }
+      });
+      saveState(); renderAll();
+      alert(added ? `Synced ${added} coaching batch sessions (Lecture, DPP, PYQs, Practice Sheet & Test) for ${formatShort(state.selectedDate)}!` : "Batch already synced for this date.");
+    });
+
+    // =========================================================
+    // RENDER HERO, CALENDAR & MAIN PANEL
+    // =========================================================
+    function renderAll() {
+      const cfg = currentCfg();
+      const r = currentRole();
+      document.body.setAttribute("data-theme", r);
+      document.getElementById("roleLabel").textContent = cfg.label;
+      document.getElementById("myConnectCode").textContent = state.connectCode;
+      document.getElementById("syncStatusLabel").textContent = state.apiKey ? "API Synced" : "Local Mode";
+      document.getElementById("syncCoachingBtn").style.display = r === "student" ? "inline-flex" : "none";
+      document.getElementById("connectCodeBadge").style.display = r === "student" ? "none" : "inline-flex";
+
+      document.getElementById("heroTodayDate").textContent = formatHero(todayStr);
+      document.getElementById("heroQuote").textContent = cfg.quote;
+      document.getElementById("heroStat1Label").textContent = cfg.stat1Label;
+      document.getElementById("heroStat2Label").textContent = cfg.stat2Label;
+      document.getElementById("heroStat3Label").textContent = cfg.stat3Label;
+
+      const lecs = getLecturesForDate(todayStr);
+      const dTargets = getDailyTargetsForDate(todayStr);
+      document.getElementById("heroStat1Val").textContent = `${lecs.filter(isLectureDone).length}/${lecs.length}`;
+      document.getElementById("heroStat2Val").textContent = `${dTargets.filter(t => t.done).length}/${dTargets.length}`;
+      document.getElementById("heroStat3Val").textContent = r === "student"
+        ? calculateStreak()
+        : state.meetings.filter(m => m.meetingDate === todayStr).length;
+
+      const tabsEl = document.getElementById("tabsContainer");
+      tabsEl.innerHTML = "";
+      cfg.tabs.forEach(t => {
+        const b = document.createElement("button");
+        b.className = "mode-tab" + (state.activeTab === t.id ? " active" : "");
+        b.textContent = t.label;
+        b.addEventListener("click", () => { state.activeTab = t.id; saveState(); renderAll(); });
+        tabsEl.appendChild(b);
+      });
+
+      document.getElementById("workspacePillBtn").textContent = state.workspaces[r];
+      document.getElementById("calFooterNote").textContent = cfg.calFooter;
+      document.getElementById("attendClassBtn").textContent = cfg.focusBtn;
+      document.getElementById("ruleNoteEl").textContent = cfg.ruleNote;
+
+      renderCalendar();
+      renderMainPanel();
+    }
+
+    function renderCalendar() {
+      const first = new Date(state.viewYear, state.viewMonth, 1);
+      const last = new Date(state.viewYear, state.viewMonth + 1, 0);
+      document.getElementById("calMonthLabel").textContent = first.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
+
+      const startPad = (first.getDay() + 6) % 7;
+      const endPad = (7 - ((startPad + last.getDate()) % 7)) % 7;
+      const totalCells = startPad + last.getDate() + endPad;
+      const startDate = new Date(state.viewYear, state.viewMonth, 1 - startPad);
+      const grid = document.getElementById("calGrid");
+      grid.innerHTML = "";
+
+      for (let i = 0; i < totalCells; i++) {
+        const d = new Date(startDate);
+        d.setDate(startDate.getDate() + i);
+        const dStr = toDateStr(d);
+        const lecs = getLecturesForDate(dStr);
+        const dt = getDailyTargetsForDate(dStr);
+        const meets = currentRole() === "student" ? 0 : state.meetings.filter(m => m.meetingDate === dStr).length;
+        const total = lecs.length + dt.length + meets;
+        const done = lecs.filter(isLectureDone).length + dt.filter(t => t.done).length;
+
+        const btn = document.createElement("button");
+        btn.className = "day-cell" + (d.getMonth() !== state.viewMonth ? " outside" : "") +
+          (dStr === todayStr ? " today" : "") + (dStr === state.selectedDate ? " selected" : "");
+        btn.innerHTML = `<span class="day-num">${d.getDate()}</span>` +
+          (total ? `<span class="day-fraction">${done}/${total}</span>` : "");
+        btn.addEventListener("click", () => {
+          state.selectedDate = dStr;
+          state.viewYear = d.getFullYear();
+          state.viewMonth = d.getMonth();
+          saveState(); renderAll();
+        });
+        grid.appendChild(btn);
+      }
+    }
+
+    document.getElementById("prevMonthBtn").addEventListener("click", () => { state.viewMonth--; if (state.viewMonth < 0) { state.viewMonth = 11; state.viewYear--; } renderCalendar(); });
+    document.getElementById("nextMonthBtn").addEventListener("click", () => { state.viewMonth++; if (state.viewMonth > 11) { state.viewMonth = 0; state.viewYear++; } renderCalendar(); });
+    document.getElementById("todayBtn").addEventListener("click", () => {
+      const now = new Date(); state.viewYear = now.getFullYear(); state.viewMonth = now.getMonth(); state.selectedDate = todayStr; saveState(); renderAll();
+    });
+
+    function renderMainPanel() {
+      document.getElementById("selectedDateHeading").textContent = formatDay(state.selectedDate);
+      const isLectures = state.activeTab === "lectures";
+      document.getElementById("linesContainer").style.display = isLectures ? "block" : "none";
+      document.getElementById("customPanel").style.display = isLectures ? "none" : "flex";
+      document.getElementById("primaryFooter").style.display = isLectures ? "flex" : "none";
+      document.getElementById("bottomReminderBar").style.display = isLectures ? "flex" : "none";
+
+      if (isLectures) renderLecturesLines();
+      else if (state.activeTab === "targets") renderTargetsPanel();
+      else if (state.activeTab === "notes") renderHandwrittenNotesPanel();
+      else if (state.activeTab === "record") {
+        if (currentRole() === "student") renderStudentSyncAndRecord();
+        else renderBusinessCorporateTeam();
+      }
+    }
+
+    // 1. LECTURES / DEALS / DELIVERABLES
+    function renderLecturesLines() {
+      const cfg = currentCfg();
+      const r = currentRole();
+      const chipsWrap = document.getElementById("categoryChipsWrap");
+      chipsWrap.innerHTML = "";
+      cfg.categories.forEach(cat => {
+        const b = document.createElement("button");
+        b.className = "subj-chip" + (state.activeCategory === cat ? " active" : "");
+        b.textContent = cat;
+        b.addEventListener("click", () => { state.activeCategory = cat; renderMainPanel(); });
+        chipsWrap.appendChild(b);
+      });
+
+      const list = getLecturesForDate(state.selectedDate);
+      const container = document.getElementById("linesContainer");
+      container.innerHTML = "";
+
+      document.getElementById("subHeaderBadges").innerHTML = r === "student"
+        ? `<span class="sub-badge">Lectures ${list.filter(l => l.statuses.lecture !== "not_done").length}/${list.length}</span>
+           <span class="sub-badge">DPP ${list.filter(l => l.statuses.dpp !== "not_done").length}/${list.length}</span>
+           <span class="sub-badge">PYQs ${list.filter(l => l.statuses.pyq !== "not_done").length}/${list.length}</span>`
+        : `<span class="sub-badge">${list.filter(isLectureDone).length}/${list.length} Done</span>`;
+
+      const backlogCount = list.filter(l => l.scheduledDate < state.selectedDate && !isLectureDone(l)).length;
+      const banner = document.getElementById("backlogBanner");
+      banner.classList.toggle("visible", backlogCount > 0);
+      banner.textContent = `⏳ ${backlogCount} unfinished item${backlogCount > 1 ? "s" : ""} rolled over as backlog from earlier days.`;
+
+      list.forEach((item, idx) => {
+        const row = document.createElement("div");
+        row.className = "item-row" + (isLectureDone(item) ? " completed-row" : "") + (item.id === state.focusedItemId ? " focused-row" : "");
+
+        const num = document.createElement("div");
+        num.className = "line-num"; num.textContent = idx + 1;
+
+        const main = document.createElement("div");
+        main.className = "item-main";
+        const top = document.createElement("div");
+        top.className = "item-top";
+
+        const sel = document.createElement("select");
+        sel.className = "cat-select";
+        cfg.categories.forEach(c => {
+          const opt = document.createElement("option");
+          opt.value = c; opt.textContent = c;
+          if (item.category === c) opt.selected = true;
+          sel.appendChild(opt);
+        });
+        sel.addEventListener("change", () => { item.category = sel.value; saveState(); });
+
+        const inp = document.createElement("input");
+        inp.type = "text"; inp.className = "line-input"; inp.value = item.title;
+        inp.addEventListener("focus", () => {
+          state.focusedItemId = item.id;
+          document.getElementById("focusedLabel").textContent = item.title || "Untitled";
+          document.getElementById("bottomTimeInput").value = item.reminderTime || "";
+        });
+        inp.addEventListener("input", () => { item.title = inp.value; saveState(); });
+
+        const timeInp = document.createElement("input");
+        timeInp.type = "time"; timeInp.className = "inline-time"; timeInp.value = item.reminderTime || "";
+        timeInp.addEventListener("change", () => { item.reminderTime = timeInp.value; item.remindedOn = null; saveState(); });
+
+        top.append(sel, inp, timeInp);
+        main.appendChild(top);
+
+        const tagRow = document.createElement("div");
+        tagRow.className = "tag-row";
+        if (item.scheduledDate < state.selectedDate) tagRow.innerHTML += `<span class="tag-backlog">Backlog from ${formatShort(item.scheduledDate)}</span>`;
+        if (item.score) tagRow.innerHTML += `<span class="tag-assigned">Score: ${esc(item.score)}</span>`;
+        if (item.proofNote) tagRow.innerHTML += `<span class="tag-verified">Note: ${esc(item.proofNote)}</span>`;
+        if (tagRow.children.length) main.appendChild(tagRow);
+
+        const checks = document.createElement("div");
+        checks.className = "checks-wrap";
+
+        if (r === "student") {
+          MATERIALS.forEach(m => {
+            const st = (item.statuses && item.statuses[m.key]) || "not_done";
+            const btn = document.createElement("button");
+            btn.className = "check-chip" + (st === "verified_direct" ? " verified" : st === "self_marked" ? " self" : "");
+            btn.textContent = (st === "verified_direct" ? "✓ " : st === "self_marked" ? "⚠ " : "") + m.label;
+            btn.addEventListener("click", () => {
+              if (m.key === "notes") { state.activeTab = "notes"; saveState(); renderAll(); return; }
+              openVerifyModal(item.id, m.key, m.label);
+            });
+            checks.appendChild(btn);
+          });
+        } else {
+          const l1 = r === "business" ? "Executed" : "Completed";
+          const l2 = r === "business" ? "Follow-up" : "Reviewed";
+          const b1 = document.createElement("button");
+          b1.className = "check-chip" + (item.statuses.lecture !== "not_done" ? " checked" : "");
+          b1.textContent = (item.statuses.lecture !== "not_done" ? "✓ " : "") + l1;
+          b1.addEventListener("click", () => {
+            item.statuses.lecture = item.statuses.lecture === "not_done" ? "verified_direct" : "not_done";
+            item.completedDate = isLectureDone(item) ? state.selectedDate : null;
+            saveState(); renderAll();
+          });
+          const b2 = document.createElement("button");
+          b2.className = "check-chip" + (item.statuses.dpp !== "not_done" ? " checked" : "");
+          b2.textContent = (item.statuses.dpp !== "not_done" ? "✓ " : "") + l2;
+          b2.addEventListener("click", () => {
+            item.statuses.dpp = item.statuses.dpp === "not_done" ? "verified_direct" : "not_done";
+            item.completedDate = isLectureDone(item) ? state.selectedDate : null;
+            saveState(); renderAll();
+          });
+          checks.append(b1, b2);
+        }
+
+        const xBtn = document.createElement("button");
+        xBtn.className = "mark-btn mark-cross"; xBtn.textContent = "✕";
+        xBtn.addEventListener("click", () => {
+          if (item.scheduledDate < state.selectedDate) item.dismissed = true;
+          else state.lectures = state.lectures.filter(x => x.id !== item.id);
+          saveState(); renderAll();
+        });
+        checks.appendChild(xBtn);
+
+        row.append(num, main, checks);
+        container.appendChild(row);
+      });
+
+      // Infinite Blank Line
+      const blankRow = document.createElement("div");
+      blankRow.className = "item-row";
+      blankRow.innerHTML = `<div class="line-num">${list.length + 1}</div>`;
+      const bMain = document.createElement("div"); bMain.className = "item-main";
+      const bTop = document.createElement("div"); bTop.className = "item-top";
+      const bInp = document.createElement("input");
+      bInp.type = "text"; bInp.id = "blankLineInput"; bInp.className = "line-input"; bInp.placeholder = cfg.placeholder;
+      let committed = false;
+      function commit(refocus) {
+        if (committed) return;
+        const val = bInp.value.trim();
+        if (!val) return;
+        committed = true;
+        const created = {
+          id: uid(), roleScope: r, category: state.activeCategory, title: val,
+          scheduledDate: state.selectedDate, reminderTime: "", remindedOn: null,
+          statuses: { lecture: "not_done", dpp: "not_done", pyq: "not_done", sheet: "not_done", test: "not_done", notes: "not_done" },
+          score: "", proofNote: "", focusSeconds: 0,
+          checkQuestion: "Enter key concept/formula learned:", expectedKeyword: "",
+          completedDate: null, dismissed: false
+        };
+        state.lectures.push(created);
+        state.focusedItemId = created.id;
+        saveState(); renderAll();
+        if (refocus) setTimeout(() => document.getElementById("blankLineInput")?.focus(), 0);
+      }
+      bInp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); commit(true); } });
+      bInp.addEventListener("blur", () => { if (bInp.value.trim()) commit(false); });
+      bTop.appendChild(bInp); bMain.appendChild(bTop);
+      blankRow.append(bMain, document.createTextNode(""));
+      container.appendChild(blankRow);
+    }
+
+    // 2. DAILY, WEEKLY & MONTHLY TARGETS
+    function renderTargetsPanel() {
+      const wrap = document.getElementById("customPanel");
+      const r = currentRole();
+      const daily = getDailyTargetsForDate(state.selectedDate);
+      const weekly = state.targets.filter(t => !t.dismissed && t.roleScope === r && t.cadence === "weekly");
+      const monthly = state.targets.filter(t => !t.dismissed && t.roleScope === r && t.cadence === "monthly");
+      const activeConns = state.connections.filter(c => c.status === "active");
+
+      document.getElementById("subHeaderBadges").innerHTML = `
+        <span class="sub-badge">Daily ${daily.filter(t => t.done).length}/${daily.length}</span>
+        <span class="sub-badge">Weekly ${weekly.filter(t => t.done).length}/${weekly.length}</span>
+        <span class="sub-badge">Monthly ${monthly.filter(t => t.done).length}/${monthly.length}</span>
+      `;
+      document.getElementById("backlogBanner").classList.remove("visible");
+
+      function buildCadenceBox(title, cadence, list, hint) {
+        return `
+          <div class="box">
+            <h3>${title}</h3>
+            <div style="font-size:0.78rem; color:var(--muted); margin-bottom:8px;">${hint}</div>
+            <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
+              <input id="inp_${cadence}" class="field-input" style="flex:1; min-width:170px;" placeholder="Add ${cadence} target..." />
+              ${r !== "student" && cadence === "daily" && activeConns.length ? `
+                <select id="assign_${cadence}" class="cat-select">
+                  <option value="">Assign: Myself</option>
+                  ${activeConns.map(c => `<option value="${esc(c.partnerName)}">Assign → ${esc(c.partnerName)}</option>`).join("")}
+                </select>
+              ` : ""}
+              <input id="time_${cadence}" type="time" class="inline-time" value="20:00" />
+              <button class="primary-btn" data-add-target="${cadence}">+ Add</button>
+            </div>
+            <div>
+              ${list.length === 0 ? `<div style="font-size:0.82rem; color:var(--muted);">No ${cadence} targets yet.</div>` : ""}
+              ${list.map((t, idx) => `
+                <div class="item-row ${t.done ? "completed-row" : ""}" style="padding:8px 10px; background:var(--surface); border-radius:10px; margin-bottom:6px;">
+                  <div class="line-num">${idx + 1}.</div>
+                  <div class="item-main">
+                    <div class="item-top">
+                      <span class="line-input" style="padding:0;">${esc(t.title)}</span>
+                      ${t.time ? `<span class="tag-assigned">⏰ ${esc(t.time)}</span>` : ""}
+                      ${t.assignedTo ? `<span class="tag-assigned">→ ${esc(t.assignedTo)}</span>` : ""}
+                      ${t.date < state.selectedDate && cadence === "daily" ? `<span class="tag-backlog">From ${formatShort(t.date)}</span>` : ""}
+                    </div>
+                  </div>
+                  <div class="checks-wrap">
+                    <button class="mark-btn mark-tick ${t.done ? "active" : ""}" data-toggle-target="${t.id}">✓</button>
+                    <button class="mark-btn mark-cross" data-del-target="${t.id}">✕</button>
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      }
+
+      wrap.innerHTML =
+        buildCadenceBox(`🎯 Daily Targets (${formatShort(state.selectedDate)})`, "daily", daily, "Unfinished daily targets automatically roll to tomorrow.") +
+        buildCadenceBox("📆 Weekly Targets", "weekly", weekly, "Weekly chapter tests, sheets, or business deliverables.") +
+        buildCadenceBox("🗓️ Monthly Targets", "monthly", monthly, "Monthly syllabus milestones and big-picture goals.");
+
+      wrap.querySelectorAll("[data-add-target]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const cad = btn.dataset.addTarget;
+          const title = document.getElementById(`inp_${cad}`).value.trim();
+          const time = document.getElementById(`time_${cad}`).value;
+          const assignEl = document.getElementById(`assign_${cad}`);
+          const assignedTo = assignEl ? assignEl.value : "";
+          if (!title) return;
+          state.targets.push({ id: uid(), roleScope: r, cadence: cad, title, date: state.selectedDate, time, assignedTo, remindedOn: null, done: false, completedDate: null, dismissed: false });
+          saveState(); renderAll();
+        });
+      });
+
+      wrap.querySelectorAll("[data-toggle-target]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const t = state.targets.find(x => x.id === btn.dataset.toggleTarget);
+          if (t) { t.done = !t.done; t.completedDate = t.done ? state.selectedDate : null; saveState(); renderAll(); }
+        });
+      });
+
+      wrap.querySelectorAll("[data-del-target]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const t = state.targets.find(x => x.id === btn.dataset.delTarget);
+          if (t) {
+            if (t.date < state.selectedDate) t.dismissed = true;
+            else state.targets = state.targets.filter(x => x.id !== t.id);
+            saveState(); renderAll();
+          }
+        });
+      });
+    }
+
+    // 3. HANDWRITTEN NOTES PAD WITH UNDO + ERASER + SUMMARY
+    function renderHandwrittenNotesPanel() {
+      const wrap = document.getElementById("customPanel");
+      document.getElementById("subHeaderBadges").innerHTML = `<span class="sub-badge">Saved Notes: ${state.handwrittenNotes.length}</span>`;
+      document.getElementById("backlogBanner").classList.remove("visible");
+
+      wrap.innerHTML = `
+        <div class="box">
+          <h3>✍️ Handwritten Notes & Short Summary</h3>
+          <div class="form-grid" style="margin-bottom:10px;">
+            <select id="noteSubjectSel" class="field-input">
+              ${ROLE_CONFIG.student.categories.map(c => `<option value="${c}">${c}</option>`).join("")}
+            </select>
+            <input id="noteTitleInp" class="field-input" placeholder="Chapter / Topic Title (e.g. Rotational Dynamics)" />
+          </div>
+
+          <div class="canvas-toolbar">
+            <span style="font-size:0.78rem; font-weight:700; color:var(--muted);">Pen:</span>
+            <button class="color-dot active" data-color="#0f172a" style="background:#0f172a;"></button>
+            <button class="color-dot" data-color="#2563eb" style="background:#2563eb;"></button>
+            <button class="color-dot" data-color="#dc2626" style="background:#dc2626;"></button>
+            <button id="eraserBtn" class="today-btn">🩹 Eraser</button>
+            <button id="undoCanvasBtn" class="today-btn">↩️ Undo</button>
+            <button id="clearCanvasBtn" class="today-btn">🗑️ Clear</button>
+          </div>
+
+          <canvas id="handwriteCanvas" class="note-canvas"></canvas>
+
+          <textarea id="noteSummaryInp" class="field-input" rows="2" style="margin-top:10px;" placeholder="Write short formula summary / revision points..."></textarea>
+          <div style="margin-top:10px; display:flex; justify-content:flex-end;">
+            <button id="saveHandwrittenBtn" class="primary-btn">💾 Save Handwritten Note</button>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>📒 My Handwritten Notes Bank</h3>
+          <div class="saved-notes-grid">
+            ${state.handwrittenNotes.length === 0 ? `<div style="font-size:0.84rem; color:var(--muted);">Draw above and click Save to build your handwritten revision bank.</div>` : ""}
+            ${state.handwrittenNotes.map(n => `
+              <div class="note-card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span class="tag-assigned">${esc(n.subject)}</span>
+                  <button class="mark-btn mark-cross" style="width:24px; height:24px; font-size:0.75rem;" data-del-note="${n.id}">✕</button>
+                </div>
+                <strong style="font-size:0.88rem;">${esc(n.title)}</strong>
+                <img src="${n.imageData}" alt="Handwritten note" />
+                <div style="font-size:0.78rem; color:var(--muted);">${esc(n.summary || "No text summary")}</div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
+
+      const canvas = document.getElementById("handwriteCanvas");
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width || 650;
+      canvas.height = 240;
+      const ctx = canvas.getContext("2d");
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      let drawing = false, penColor = "#0f172a", isEraser = false;
+      const undoStack = [];
+
+      function pushUndo() {
+        if (undoStack.length > 20) undoStack.shift();
+        undoStack.push(canvas.toDataURL());
+      }
+
+      wrap.querySelectorAll("[data-color]").forEach(dot => {
+        dot.addEventListener("click", () => {
+          isEraser = false;
+          penColor = dot.dataset.color;
+          wrap.querySelectorAll("[data-color]").forEach(d => d.classList.toggle("active", d === dot));
+        });
+      });
+      document.getElementById("eraserBtn").addEventListener("click", () => { isEraser = !isEraser; });
+      document.getElementById("undoCanvasBtn").addEventListener("click", () => {
+        if (!undoStack.length) return;
+        const img = new Image();
+        img.onload = () => { ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.drawImage(img, 0, 0); };
+        img.src = undoStack.pop();
+      });
+      document.getElementById("clearCanvasBtn").addEventListener("click", () => {
+        pushUndo();
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      });
+
+      function getPos(e) {
+        const r = canvas.getBoundingClientRect();
+        return { x: (e.clientX - r.left) * (canvas.width / r.width), y: (e.clientY - r.top) * (canvas.height / r.height) };
+      }
+
+      canvas.addEventListener("pointerdown", e => {
+        pushUndo();
+        drawing = true;
+        const p = getPos(e);
+        ctx.beginPath(); ctx.moveTo(p.x, p.y);
+      });
+      canvas.addEventListener("pointermove", e => {
+        if (!drawing) return;
+        const p = getPos(e);
+        ctx.strokeStyle = isEraser ? "#ffffff" : penColor;
+        ctx.lineWidth = isEraser ? 16 : 2.5;
+        ctx.lineTo(p.x, p.y); ctx.stroke();
+      });
+      ["pointerup", "pointercancel", "pointerleave"].forEach(ev => canvas.addEventListener(ev, () => { drawing = false; }));
+
+      document.getElementById("saveHandwrittenBtn").addEventListener("click", () => {
+        const title = document.getElementById("noteTitleInp").value.trim() || "Handwritten Note";
+        const subject = document.getElementById("noteSubjectSel").value;
+        const summary = document.getElementById("noteSummaryInp").value.trim();
+        const imageData = canvas.toDataURL("image/png");
+        state.handwrittenNotes.unshift({ id: uid(), subject, title, summary, imageData, date: state.selectedDate });
+        const matchLec = state.lectures.find(l => l.scheduledDate === state.selectedDate && l.category === subject);
+        if (matchLec) matchLec.statuses.notes = "verified_direct";
+        saveState(); renderAll();
+      });
+
+      wrap.querySelectorAll("[data-del-note]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.handwrittenNotes = state.handwrittenNotes.filter(n => n.id !== btn.dataset.delNote);
+          saveState(); renderAll();
+        });
+      });
+    }
+
+    // 4. STUDENT COACHING SYNC & VERIFICATION RECORD
+    function renderStudentSyncAndRecord() {
+      const wrap = document.getElementById("customPanel");
+      const all = state.lectures.filter(l => !l.dismissed && l.roleScope === "student");
+      document.getElementById("subHeaderBadges").innerHTML = `<span class="sub-badge">Batch: ${esc(state.connectedCoaching.batchCode)}</span>`;
+      document.getElementById("backlogBanner").classList.remove("visible");
+
+      const badge = st => st === "verified_direct"
+        ? `<span class="tag-verified">Verified ✓</span>`
+        : st === "self_marked" ? `<span class="tag-self">Self-Marked ⚠</span>` : `<span class="tag-backlog">Not Done ✕</span>`;
+
+      wrap.innerHTML = `
+        <div class="box">
+          <h3>🔗 Connected Coaching Batch</h3>
+          <div style="font-size:0.84rem; color:var(--muted);">
+            Connect your coaching batch (PW, JEE, NEET, etc.) so Lectures, DPP, PYQs, Practice Sheets & Tests sync directly into your calendar.
+          </div>
+          <div class="form-grid">
+            <input id="coachInstInp" class="field-input" value="${esc(state.connectedCoaching.institute)}" placeholder="Coaching Institute" />
+            <input id="coachBatchInp" class="field-input" value="${esc(state.connectedCoaching.batchCode)}" placeholder="Batch Code" />
+          </div>
+          <button id="saveCoachingBtn" class="primary-btn" style="margin-top:10px;">Save & Connect Batch</button>
+        </div>
+
+        <div class="box">
+          <h3>📊 Direct Verification Record (Lectures, DPP, PYQs, Practice Sheet & Test)</h3>
+          <div style="overflow-x:auto; margin-top:8px;">
+            <table class="record-table">
+              <thead>
+                <tr><th>Date</th><th>Topic</th><th>Lecture</th><th>DPP</th><th>PYQs</th><th>Sheet</th><th>Test</th><th>Notes</th><th>Score</th></tr>
+              </thead>
+              <tbody>
+                ${all.map(it => `
+                  <tr>
+                    <td>${formatShort(it.scheduledDate)}</td>
+                    <td><strong>${esc(it.category)}:</strong> ${esc(it.title)}</td>
+                    <td>${badge(it.statuses.lecture)}</td>
+                    <td>${badge(it.statuses.dpp)}</td>
+                    <td>${badge(it.statuses.pyq)}</td>
+                    <td>${badge(it.statuses.sheet)}</td>
+                    <td>${badge(it.statuses.test)}</td>
+                    <td>${badge(it.statuses.notes)}</td>
+                    <td>${esc(it.score || "—")}</td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+
+      document.getElementById("saveCoachingBtn").addEventListener("click", () => {
+        state.connectedCoaching.institute = document.getElementById("coachInstInp").value.trim() || "Physics Wallah (PW)";
+        state.connectedCoaching.batchCode = document.getElementById("coachBatchInp").value.trim().toUpperCase() || "PW-ARJUNA-40";
+        state.workspaces.student = `${state.connectedCoaching.institute} · ${state.connectedCoaching.batchCode}`;
+        saveState(); renderAll();
+      });
+    }
+
+    // 5. BUSINESS / CORPORATE TEAM & MEETINGS
+    function renderBusinessCorporateTeam() {
+      const wrap = document.getElementById("customPanel");
+      const dayMeets = state.meetings.filter(m => m.meetingDate === state.selectedDate);
+      document.getElementById("subHeaderBadges").innerHTML = `<span class="sub-badge">Connected: ${state.connections.length}</span><span class="sub-badge">Meetings: ${dayMeets.length}</span>`;
+      document.getElementById("backlogBanner").classList.remove("visible");
+
+      wrap.innerHTML = `
+        <div class="box">
+          <h3>🔗 Connect ${currentRole() === "business" ? "Employees / Corporate Persons" : "Employers / Business Persons"}</h3>
+          <div style="font-size:0.82rem; color:var(--muted);">Your Connect Code: <strong>${esc(state.connectCode)}</strong></div>
+          <div class="form-grid">
+            <input id="cCodeIn" class="field-input" placeholder="Connect Code (e.g. NRY-EMP101)" />
+            <input id="cDeptIn" class="field-input" placeholder="Role / Department" />
+          </div>
+          <button id="cAddBtn" class="primary-btn" style="margin-top:10px;">Send Connection</button>
+          <div style="margin-top:10px;">
+            ${state.connections.map(c => `<div class="conn-item"><div><strong>${esc(c.partnerName)}</strong> (${esc(c.titleOrDept)})</div><span class="tag-verified">${esc(c.status.toUpperCase())}</span></div>`).join("")}
+          </div>
+        </div>
+        <div class="box">
+          <h3>📅 Schedule Meeting (${formatShort(state.selectedDate)})</h3>
+          <div class="form-grid">
+            <input id="mTitleIn" class="field-input" placeholder="Meeting Title" />
+            <input id="mTimeIn" type="time" class="field-input" value="17:00" />
+          </div>
+          <button id="mAddBtn" class="primary-btn" style="margin-top:10px;">+ Schedule Meeting</button>
+          <div style="margin-top:10px;">
+            ${dayMeets.length === 0 ? `<div style="font-size:0.82rem; color:var(--muted);">No meetings for this date.</div>` : ""}
+            ${dayMeets.map(m => `<div class="meet-item"><div><strong>⏰ ${esc(m.startTime)} — ${esc(m.title)}</strong></div><span class="tag-assigned">${esc(m.status)}</span></div>`).join("")}
+          </div>
+        </div>
+      `;
+      document.getElementById("cAddBtn").addEventListener("click", async () => {
+        const code = document.getElementById("cCodeIn").value.trim().toUpperCase();
+        const dept = document.getElementById("cDeptIn").value.trim() || "Team Member";
+        if (!code) return;
+        await apiCall("POST", "/connections/connect", { target_connect_code: code, title_or_department: dept });
+        state.connections.push({ id: uid(), partnerId: uid(), partnerName: `Member (${code})`, titleOrDept: dept, partnerCode: code, status: "active" });
+        saveState(); renderAll();
+      });
+      document.getElementById("mAddBtn").addEventListener("click", async () => {
+        const title = document.getElementById("mTitleIn").value.trim();
+        const startTime = document.getElementById("mTimeIn").value;
+        if (!title) return;
+        state.meetings.push({ id: uid(), title, meetingDate: state.selectedDate, startTime, status: "scheduled", remindedOn: null });
+        await apiCall("POST", "/meetings", { title, meeting_date: state.selectedDate, start_time: startTime });
+        saveState(); renderAll();
+      });
+    }
+
+    // Verification Modal
+    function openVerifyModal(itemId, key, label) {
+      const item = state.lectures.find(x => x.id === itemId);
+      if (!item) return;
+      pendingVerify = { itemId, key };
+      document.getElementById("verifyModalTitle").textContent = `Check ${label}: "${item.title}"`;
+      document.getElementById("verifyQuestionText").textContent = item.checkQuestion || "Enter a key formula or concept you solved:";
+      document.getElementById("verifyAnswerInput").value = "";
+      document.getElementById("verifyScoreInput").value = item.score || "";
+      document.getElementById("verifyProofNote").value = item.proofNote || "";
+      document.getElementById("verifyScoreFields").style.display = ["dpp", "pyq", "sheet", "test"].includes(key) ? "block" : "none";
+      document.getElementById("verifyErrorMsg").textContent = "";
+      document.getElementById("verifyModal").classList.remove("hidden");
+    }
+
+    document.getElementById("verifyCancelBtn").addEventListener("click", () => document.getElementById("verifyModal").classList.add("hidden"));
+    document.getElementById("verifySelfMarkBtn").addEventListener("click", () => {
+      if (!pendingVerify) return;
+      const item = state.lectures.find(x => x.id === pendingVerify.itemId);
+      item.statuses[pendingVerify.key] = "self_marked";
+      item.completedDate = isLectureDone(item) ? state.selectedDate : null;
+      saveState(); document.getElementById("verifyModal").classList.add("hidden"); renderAll();
+    });
+
+    document.getElementById("verifySubmitBtn").addEventListener("click", () => {
+      if (!pendingVerify) return;
+      const item = state.lectures.find(x => x.id === pendingVerify.itemId);
+      const ans = document.getElementById("verifyAnswerInput").value.trim().toLowerCase();
+      const score = document.getElementById("verifyScoreInput").value.trim();
+      const note = document.getElementById("verifyProofNote").value.trim();
+      const expected = (item.expectedKeyword || "").trim().toLowerCase();
+
+      const okKeyword = expected ? ans.includes(expected) : ans.length >= 3;
+      const okScore = ["dpp", "pyq", "sheet", "test"].includes(pendingVerify.key) && score.length >= 2 && note.length >= 3;
+      const okFocus = (item.focusSeconds || 0) >= 60;
+
+      if (!okKeyword && !okScore && !okFocus) {
+        document.getElementById("verifyErrorMsg").textContent = expected
+          ? `Verification failed! Enter the keyword (hint: '${expected}') or log your score + mistake note.`
+          : "Enter at least 3 characters proving what you learned (or score + note).";
+        return;
+      }
+
+      item.statuses[pendingVerify.key] = "verified_direct";
+      if (score) item.score = score;
+      if (note) item.proofNote = note;
+      item.completedDate = isLectureDone(item) ? state.selectedDate : null;
+      saveState(); document.getElementById("verifyModal").classList.add("hidden"); renderAll();
+    });
+
+    // Reminders + Chime + Snooze
+    function playChime() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const now = ctx.currentTime;
+        [523.25, 659.25, 783.99].forEach((f, i) => {
+          const osc = ctx.createOscillator(), gain = ctx.createGain();
+          osc.frequency.value = f;
+          gain.gain.setValueAtTime(0.001, now + i * 0.14);
+          gain.gain.exponentialRampToValueAtTime(0.18, now + i * 0.14 + 0.03);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.14 + 0.35);
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.start(now + i * 0.14); osc.stop(now + i * 0.14 + 0.38);
+        });
+      } catch {}
+    }
+
+    function triggerReminder(label, refObj) {
+      activePopupTarget = refObj;
+      playChime();
+      document.getElementById("reminderPopupMsg").textContent = label;
+      document.getElementById("reminderPopup").classList.add("visible");
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("NARROYEN Reminder", { body: label });
+      }
+    }
+
+    document.getElementById("setReminderBtn").addEventListener("click", () => {
+      const val = document.getElementById("bottomTimeInput").value;
+      const item = state.lectures.find(x => x.id === state.focusedItemId);
+      if (!item || !val) return alert("Click a line above and pick a time.");
+      item.reminderTime = val; item.remindedOn = null; saveState();
+      if ("Notification" in window && Notification.permission === "default") Notification.requestPermission();
+      renderAll();
+    });
+
+    document.getElementById("testAlarmBtn").addEventListener("click", () => {
+      triggerReminder("Test Alarm: Time for your scheduled Lecture / Target!", null);
+    });
+
+    document.getElementById("popupSnoozeBtn").addEventListener("click", () => {
+      if (activePopupTarget) {
+        const d = new Date(Date.now() + 10 * 60000);
+        const t = String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+        if ("reminderTime" in activePopupTarget) activePopupTarget.reminderTime = t;
+        else if ("time" in activePopupTarget) activePopupTarget.time = t;
+        else if ("startTime" in activePopupTarget) activePopupTarget.startTime = t;
+        activePopupTarget.remindedOn = null;
+        saveState(); renderAll();
+      }
+      document.getElementById("reminderPopup").classList.remove("visible");
+    });
+
+    document.getElementById("popupCloseBtn").addEventListener("click", () => {
+      document.getElementById("reminderPopup").classList.remove("visible");
+    });
+
+    document.getElementById("reminderToggleBtn").addEventListener("click", () => {
+      if ("Notification" in window) Notification.requestPermission().then(() => {
+        const btn = document.getElementById("reminderToggleBtn");
+        const granted = Notification.permission === "granted";
+        btn.classList.toggle("active-rem", granted);
+        document.getElementById("reminderStatus").textContent = granted ? "Reminders on" : "Enable reminders";
+      });
+    });
+
+    setInterval(() => {
+      const now = new Date();
+      const curDay = toDateStr(now);
+      const hhmm = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+
+      const dueLec = state.lectures.find(l => !l.dismissed && !isLectureDone(l) && l.reminderTime === hhmm && l.remindedOn !== curDay);
+      const dueTgt = state.targets.find(t => !t.dismissed && !t.done && t.time === hhmm && t.remindedOn !== curDay);
+      const dueMeet = state.meetings.find(m => m.status === "scheduled" && m.meetingDate === curDay && m.startTime === hhmm && m.remindedOn !== curDay);
+
+      const hit = dueLec || dueTgt || dueMeet;
+      if (hit) {
+        hit.remindedOn = curDay;
+        saveState();
+        triggerReminder(`${hit.title} (${hhmm})`, hit);
+      }
+    }, 10000);
+
+    // Focus Lock-in
+    let timerInt = null, activeSecs = 0;
+    document.getElementById("attendClassBtn").addEventListener("click", () => {
+      activeSecs = 0;
+      const item = state.lectures.find(x => x.id === state.focusedItemId);
+      document.getElementById("classFocusTitle").textContent = item ? item.title : `${currentCfg().label} Focus Session`;
+      document.getElementById("classOverlay").classList.add("visible");
+      clearInterval(timerInt);
+      timerInt = setInterval(() => {
+        activeSecs++;
+        const h = String(Math.floor(activeSecs / 3600)).padStart(2, "0");
+        const m = String(Math.floor((activeSecs % 3600) / 60)).padStart(2, "0");
+        const s = String(activeSecs % 60).padStart(2, "0");
+        document.getElementById("classTimerDisplay").textContent = `${h}:${m}:${s}`;
+      }, 1000);
+    });
+    document.getElementById("classDoneExitBtn").addEventListener("click", () => {
+      clearInterval(timerInt);
+      const item = state.lectures.find(x => x.id === state.focusedItemId);
+      if (item) {
+        item.focusSeconds = (item.focusSeconds || 0) + activeSecs;
+        if (activeSecs >= 60 && currentRole() === "student") item.statuses.lecture = "verified_direct";
+        saveState();
+      }
+      document.getElementById("classOverlay").classList.remove("visible");
+      renderAll();
+    });
+    document.getElementById("classExitBtn").addEventListener("click", () => {
+      clearInterval(timerInt); document.getElementById("classOverlay").classList.remove("visible");
+    });
+
+    renderAll();
+  </script>
+</body>
+</html>
